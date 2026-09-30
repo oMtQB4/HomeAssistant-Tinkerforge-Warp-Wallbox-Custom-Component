@@ -1,0 +1,112 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Connect to WARP Charger",
+        "description": "Enter the hostname or IP address of your Tinkerforge WARP charger. Username and password are required if HTTP authentication is enabled on the charger.",
+        "data": {
+          "host": "Host",
+          "username": "Username",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "data_description": {
+          "host": "IP address or hostname without scheme, e.g. 192.168.178.15",
+          "verify_ssl": "Leave off for the charger's self-signed certificate"
+        }
+      },
+      "zeroconf_confirm": {
+        "title": "Discovered WARP Charger",
+        "description": "Set up {name} at {host}? Username and password are required if HTTP authentication is enabled on the charger.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate WARP Charger",
+        "description": "The charger at {host} requires (new) credentials.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the charger",
+      "invalid_auth": "Invalid username or password",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This charger is already configured",
+      "reauth_successful": "Re-authentication was successful",
+      "not_supported": "This device is not a WARP charger"
+    }
+  },
+  "entity": {
+    "select": {
+      "charge_mode": {
+        "name": "Charge mode",
+        "state": {
+          "fast": "Fast",
+          "off": "Off",
+          "pv": "PV",
+          "min_pv": "Min + PV",
+          "min": "Min",
+          "eco": "Eco",
+          "eco_pv": "Eco + PV",
+          "eco_min": "Eco + Min",
+          "eco_min_pv": "Eco + Min + PV"
+        }
+      }
+    },
+    "sensor": {
+      "charger_state": {
+        "name": "Charger state",
+        "state": {
+          "not_connected": "Not connected",
+          "waiting_for_release": "Waiting for release",
+          "ready": "Ready to charge",
+          "charging": "Charging",
+          "error": "Error"
+        }
+      },
+      "iec61851_state": {
+        "name": "IEC 61851 state",
+        "state": {
+          "disconnected": "A - Disconnected",
+          "connected": "B - Connected",
+          "charging": "C - Charging",
+          "charging_ventilation": "D - Charging (ventilation)",
+          "error": "E/F - Error"
+        }
+      },
+      "allowed_current": { "name": "Allowed current" },
+      "power": { "name": "Power" },
+      "energy_total": { "name": "Total energy" },
+      "session_energy": { "name": "Session energy" },
+      "ev_name": { "name": "Vehicle" },
+      "ev_soc": { "name": "Vehicle SoC" }
+    },
+    "binary_sensor": {
+      "connected": { "name": "Connected" },
+      "charging": { "name": "Charging" },
+      "error": { "name": "Error" }
+    },
+    "button": {
+      "start_charging": { "name": "Start charging" },
+      "stop_charging": { "name": "Stop charging" }
+    },
+    "number": {
+      "external_current": { "name": "External charging current" }
+    }
+  },
+  "exceptions": {
+    "authentication_error": { "message": "Authentication failed with the WARP charger" },
+    "communication_error": { "message": "Communication error with the WARP charger: {error}" },
+    "unknown_error": { "message": "Unknown error communicating with the WARP charger: {error}" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "domain": "warp_charger",
+  "name": "WARP Charger",
+  "codeowners": ["@jan"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://docs.warp-charger.com/en/docs/interfaces/mqtt_http/api_reference/",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "requirements": [],
+  "version": "1.0.0",
+  "zeroconf": [
+    {
+      "type": "_http._tcp.local.",
+      "properties": {
+        "brand": "tinkerforge"
+      }
+    }
+  ]
+}
