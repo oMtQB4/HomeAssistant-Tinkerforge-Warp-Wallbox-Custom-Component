@@ -147,6 +147,13 @@ def async_setup_services(hass: HomeAssistant) -> None:
                 )
         else:
             patch: dict[str, Any] = {}
+            if (
+                ATTR_SOC_PCT in data
+                and "soc_pct" not in runtime.coordinator.data.limits_default
+            ):
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN, translation_key="soc_unsupported"
+                )
             if ATTR_ENERGY_KWH in data:
                 patch["energy_wh"] = int(round(data[ATTR_ENERGY_KWH] * 1000))
             if ATTR_DURATION in data:
@@ -169,6 +176,10 @@ def async_setup_services(hass: HomeAssistant) -> None:
 
     async def inject_soc(call: ServiceCall) -> None:
         runtime = _runtime_for_device(hass, call.data[ATTR_DEVICE_ID])
+        if runtime.coordinator.data.ev is None:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="soc_unsupported"
+            )
         await _call(runtime.api.inject_soc(call.data[ATTR_SOC_PCT]))
 
     async def inject_nfc_tag(call: ServiceCall) -> None:

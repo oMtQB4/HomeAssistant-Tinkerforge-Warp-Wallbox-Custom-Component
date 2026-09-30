@@ -520,6 +520,9 @@
     },
     "soc_override_unsupported": {
       "message": "SoC-Limits können nur als Standardlimit gesetzt werden"
+    },
+    "soc_unsupported": {
+      "message": "Dieser Charger unterstützt keinen Fahrzeug-Ladestand (nur WARP4)"
     }
   }
 }

@@ -520,6 +520,9 @@
     },
     "soc_override_unsupported": {
       "message": "SoC limits can only be set as default limits"
+    },
+    "soc_unsupported": {
+      "message": "This charger does not support vehicle state of charge (WARP4 only)"
     }
   }
 }
