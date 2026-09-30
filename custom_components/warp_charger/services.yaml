@@ -12,7 +12,7 @@ set_charge_mode:
           translation_key: charge_mode
           options:
             - fast
-            - off
+            - "off"
             - pv
             - min_pv
             - min

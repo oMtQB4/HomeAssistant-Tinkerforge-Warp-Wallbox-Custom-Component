@@ -5,6 +5,7 @@ from __future__ import annotations
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.httpx_client import get_async_client
 from homeassistant.helpers.typing import ConfigType
@@ -14,6 +15,8 @@ from .const import CONF_USE_WEBSOCKET, CONF_VERIFY_SSL, DOMAIN, LOGGER, T_METER_
 from .coordinator import WarpConfigEntry, WarpDataUpdateCoordinator, WarpRuntimeData
 from .services import async_setup_services
 from .ws_client import WarpWebSocket
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 PLATFORMS = [
     Platform.BINARY_SENSOR,
