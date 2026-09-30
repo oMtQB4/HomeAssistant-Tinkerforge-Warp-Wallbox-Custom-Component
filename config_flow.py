@@ -7,11 +7,20 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlowWithReload,
+)
 from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME
+from homeassistant.core import callback
 from homeassistant.helpers.httpx_client import get_async_client
 from homeassistant.helpers.selector import (
     BooleanSelector,
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -25,7 +34,17 @@ from .api import (
     WarpDeviceInfo,
     normalize_host,
 )
-from .const import CONF_VERIFY_SSL, DEFAULT_HOST, DOMAIN, LOGGER
+from .const import (
+    CONF_SCAN_INTERVAL,
+    CONF_USE_WEBSOCKET,
+    CONF_VERIFY_SSL,
+    DEFAULT_HOST,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    LOGGER,
+    MAX_SCAN_INTERVAL,
+    MIN_SCAN_INTERVAL,
+)
 
 _AUTH_FIELDS = {
     vol.Optional(CONF_USERNAME): TextSelector(
@@ -47,6 +66,30 @@ STEP_USER_SCHEMA = vol.Schema(
 )
 STEP_AUTH_SCHEMA = vol.Schema(_AUTH_FIELDS)
 
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_USE_WEBSOCKET, default=True): BooleanSelector(),
+        vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): NumberSelector(
+            NumberSelectorConfig(
+                min=MIN_SCAN_INTERVAL,
+                max=MAX_SCAN_INTERVAL,
+                step=1,
+                unit_of_measurement="s",
+                mode=NumberSelectorMode.BOX,
+            )
+        ),
+    }
+)
+
+
+def _strip_empty_credentials(data: dict[str, Any]) -> dict[str, Any]:
+    """Drop blank username/password so stored values survive a reconfigure."""
+    return {
+        k: v
+        for k, v in data.items()
+        if not (k in (CONF_USERNAME, CONF_PASSWORD) and not v)
+    }
+
 
 class WarpFlowHandler(ConfigFlow, domain=DOMAIN):
     """Handle the WARP Charger config flow."""
@@ -54,6 +97,12 @@ class WarpFlowHandler(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     _discovery_host: str | None = None
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> WarpOptionsFlow:
+        """Return the options flow."""
+        return WarpOptionsFlow()
 
     async def _async_validate(
         self, data: Mapping[str, Any]
@@ -88,6 +137,7 @@ class WarpFlowHandler(ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             user_input[CONF_HOST] = normalize_host(user_input[CONF_HOST])
+            user_input = _strip_empty_credentials(user_input)
             errors, info = await self._async_validate(user_input)
             if not errors and info:
                 await self.async_set_unique_id(info.uid, raise_on_progress=False)
@@ -137,7 +187,9 @@ class WarpFlowHandler(ConfigFlow, domain=DOMAIN):
         assert self._discovery_host is not None
 
         if user_input is not None:
-            data = {CONF_HOST: self._discovery_host, **user_input}
+            data = _strip_empty_credentials(
+                {CONF_HOST: self._discovery_host, **user_input}
+            )
             errors, info = await self._async_validate(data)
             if not errors and info:
                 await self.async_set_unique_id(info.uid, raise_on_progress=False)
@@ -176,6 +228,7 @@ class WarpFlowHandler(ConfigFlow, domain=DOMAIN):
         reauth_entry = self._get_reauth_entry()
 
         if user_input is not None:
+            user_input = _strip_empty_credentials(user_input)
             data = {**reauth_entry.data, **user_input}
             errors, _info = await self._async_validate(data)
             if not errors:
@@ -195,4 +248,50 @@ class WarpFlowHandler(ConfigFlow, domain=DOMAIN):
             ),
             description_placeholders={"host": reauth_entry.data[CONF_HOST]},
             errors=errors,
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Change host, credentials or TLS verification."""
+        errors: dict[str, str] = {}
+        entry = self._get_reconfigure_entry()
+
+        if user_input is not None:
+            user_input[CONF_HOST] = normalize_host(user_input[CONF_HOST])
+            user_input = _strip_empty_credentials(user_input)
+            data = {**entry.data, **user_input}
+            errors, info = await self._async_validate(data)
+            if not errors and info:
+                await self.async_set_unique_id(info.uid)
+                self._abort_if_unique_id_mismatch(reason="wrong_device")
+                return self.async_update_reload_and_abort(entry, data_updates=user_input)
+
+        suggested = user_input or {
+            k: v for k, v in entry.data.items() if k != CONF_PASSWORD
+        }
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(STEP_USER_SCHEMA, suggested),
+            description_placeholders={"host": entry.data[CONF_HOST]},
+            errors=errors,
+        )
+
+
+class WarpOptionsFlow(OptionsFlowWithReload):
+    """Options: push channel and fallback poll interval."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            user_input[CONF_SCAN_INTERVAL] = int(user_input[CONF_SCAN_INTERVAL])
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
         )

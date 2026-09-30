@@ -1,0 +1,156 @@
+{
+  "entity": {
+    "select": {
+      "charge_mode": {
+        "default": "mdi:ev-station",
+        "state": {
+          "fast": "mdi:flash",
+          "off": "mdi:power-off",
+          "pv": "mdi:solar-power",
+          "min_pv": "mdi:solar-power-variant",
+          "min": "mdi:battery-charging-low",
+          "eco": "mdi:leaf",
+          "eco_pv": "mdi:leaf",
+          "eco_min": "mdi:leaf",
+          "eco_min_pv": "mdi:leaf"
+        }
+      },
+      "duration_limit": {
+        "default": "mdi:timer-outline"
+      }
+    },
+    "sensor": {
+      "charger_state": {
+        "default": "mdi:ev-station",
+        "state": {
+          "not_connected": "mdi:ev-plug-type2",
+          "waiting_for_release": "mdi:lock-clock",
+          "ready": "mdi:battery-clock",
+          "charging": "mdi:battery-charging",
+          "error": "mdi:alert-circle"
+        }
+      },
+      "iec61851_state": {
+        "default": "mdi:state-machine"
+      },
+      "ev_name": {
+        "default": "mdi:car-electric"
+      },
+      "session_duration": {
+        "default": "mdi:timer-play-outline"
+      },
+      "session_user": {
+        "default": "mdi:account"
+      },
+      "last_session_energy": {
+        "default": "mdi:history"
+      },
+      "last_session_duration": {
+        "default": "mdi:history"
+      },
+      "limit_target_energy": {
+        "default": "mdi:battery-arrow-up"
+      },
+      "limit_target_soc": {
+        "default": "mdi:battery-arrow-up"
+      },
+      "charging_time": {
+        "default": "mdi:timer-outline"
+      },
+      "error_state": {
+        "default": "mdi:alert-circle-check-outline",
+        "state": {
+          "ok": "mdi:check-circle-outline"
+        }
+      },
+      "dc_fault_state": {
+        "default": "mdi:current-dc"
+      },
+      "contactor_state": {
+        "default": "mdi:electric-switch"
+      },
+      "ip_address": {
+        "default": "mdi:ip-network"
+      },
+      "ethernet_link": {
+        "default": "mdi:ethernet"
+      },
+      "grid_power": {
+        "default": "mdi:transmission-tower"
+      },
+      "available_power": {
+        "default": "mdi:lightning-bolt-outline"
+      },
+      "phases": {
+        "default": "mdi:sine-wave"
+      }
+    },
+    "button": {
+      "start_charging": {
+        "default": "mdi:play"
+      },
+      "stop_charging": {
+        "default": "mdi:stop"
+      },
+      "reset_dc_fault": {
+        "default": "mdi:restore-alert"
+      }
+    },
+    "number": {
+      "external_current": {
+        "default": "mdi:current-ac"
+      },
+      "energy_limit": {
+        "default": "mdi:battery-arrow-up"
+      },
+      "soc_limit": {
+        "default": "mdi:battery-high"
+      },
+      "guaranteed_power": {
+        "default": "mdi:flash-outline"
+      },
+      "target_power_from_grid": {
+        "default": "mdi:transmission-tower-import"
+      }
+    },
+    "switch": {
+      "auto_start_charging": {
+        "default": "mdi:play-circle-outline"
+      },
+      "boost_mode": {
+        "default": "mdi:rocket-launch-outline"
+      },
+      "ev_wakeup": {
+        "default": "mdi:alarm"
+      },
+      "excess_charging": {
+        "default": "mdi:solar-power"
+      }
+    },
+    "event": {
+      "nfc_tag": {
+        "default": "mdi:nfc-variant"
+      },
+      "charge_session": {
+        "default": "mdi:ev-station"
+      }
+    }
+  },
+  "services": {
+    "set_charge_mode": {
+      "service": "mdi:ev-station"
+    },
+    "set_charge_limits": {
+      "service": "mdi:battery-arrow-up"
+    },
+    "set_external_current": {
+      "service": "mdi:current-ac"
+    },
+    "inject_soc": {
+      "service": "mdi:battery-sync"
+    },
+    "inject_nfc_tag": {
+      "service": "mdi:nfc-variant"
+    }
+  }
+}

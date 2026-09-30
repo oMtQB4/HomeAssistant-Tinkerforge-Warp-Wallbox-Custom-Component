@@ -10,6 +10,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -23,7 +24,8 @@ PARALLEL_UPDATES = 0
 class WarpBinarySensorDescription(BinarySensorEntityDescription):
     """Describe a WARP binary sensor."""
 
-    is_on_fn: Callable[[WarpData], bool]
+    has_fn: Callable[[WarpData], bool] = lambda _: True
+    is_on_fn: Callable[[WarpData], bool | None]
 
 
 DESCRIPTIONS: tuple[WarpBinarySensorDescription, ...] = (
@@ -45,6 +47,22 @@ DESCRIPTIONS: tuple[WarpBinarySensorDescription, ...] = (
         device_class=BinarySensorDeviceClass.PROBLEM,
         is_on_fn=lambda d: d.error_state != 0,
     ),
+    WarpBinarySensorDescription(
+        key="websocket_connected",
+        translation_key="websocket_connected",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        is_on_fn=lambda d: d.ws_connected,
+    ),
+    WarpBinarySensorDescription(
+        key="ntp_synced",
+        translation_key="ntp_synced",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        has_fn=lambda d: "synced" in d.ntp,
+        is_on_fn=lambda d: d.ntp.get("synced"),
+    ),
 )
 
 
@@ -60,6 +78,7 @@ async def async_setup_entry(
             entry=entry, coordinator=coordinator, description=description
         )
         for description in DESCRIPTIONS
+        if description.has_fn(coordinator.data)
     )
 
 
@@ -69,6 +88,6 @@ class WarpBinarySensorEntity(WarpEntity, BinarySensorEntity):
     entity_description: WarpBinarySensorDescription
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return the state."""
         return self.entity_description.is_on_fn(self.coordinator.data)

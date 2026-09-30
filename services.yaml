@@ -1,0 +1,133 @@
+set_charge_mode:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: warp_charger
+    mode:
+      required: true
+      selector:
+        select:
+          translation_key: charge_mode
+          options:
+            - fast
+            - off
+            - pv
+            - min_pv
+            - min
+            - eco
+            - eco_pv
+            - eco_min
+            - eco_min_pv
+
+set_charge_limits:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: warp_charger
+    energy_kwh:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 200
+          step: 0.5
+          unit_of_measurement: kWh
+    duration:
+      required: false
+      selector:
+        select:
+          translation_key: duration_limit
+          options:
+            - unlimited
+            - 15_min
+            - 30_min
+            - 45_min
+            - 1_h
+            - 2_h
+            - 3_h
+            - 4_h
+            - 6_h
+            - 8_h
+            - 12_h
+    soc_pct:
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+    override:
+      required: false
+      default: false
+      selector:
+        boolean:
+
+set_external_current:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: warp_charger
+    current_a:
+      required: true
+      example: 16
+      selector:
+        number:
+          min: 0
+          max: 32
+          step: 1
+          unit_of_measurement: A
+
+inject_soc:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: warp_charger
+    soc_pct:
+      required: true
+      example: 63
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          unit_of_measurement: "%"
+
+inject_nfc_tag:
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: warp_charger
+    tag_id:
+      required: true
+      example: "01:23:AB:3D"
+      selector:
+        text:
+    tag_type:
+      required: false
+      default: 0
+      selector:
+        number:
+          min: 0
+          max: 4
+          step: 1
+    action:
+      required: false
+      default: toggle
+      selector:
+        select:
+          translation_key: nfc_action
+          options:
+            - toggle
+            - start
+            - stop

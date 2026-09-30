@@ -33,6 +33,16 @@
           "password": "Password",
           "verify_ssl": "Verify SSL certificate"
         }
+      },
+      "reconfigure": {
+        "title": "Reconfigure WARP Charger",
+        "description": "Change host, credentials or TLS verification for the charger at {host}. Leave the password empty to keep the stored one.",
+        "data": {
+          "host": "Host",
+          "username": "Username",
+          "password": "Password",
+          "verify_ssl": "Verify SSL certificate"
+        }
       }
     },
     "error": {
@@ -43,7 +53,153 @@
     "abort": {
       "already_configured": "This charger is already configured",
       "reauth_successful": "Re-authentication was successful",
-      "not_supported": "This device is not a WARP charger"
+      "reconfigure_successful": "Reconfiguration was successful",
+      "not_supported": "This device is not a WARP charger",
+      "wrong_device": "The charger at this address is a different device than the configured one"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "WARP Charger options",
+        "data": {
+          "use_websocket": "Push updates via WebSocket",
+          "scan_interval": "Polling interval (fallback)"
+        },
+        "data_description": {
+          "use_websocket": "Receive state changes instantly from the charger. Polling is only used as a fallback.",
+          "scan_interval": "Seconds between HTTP polls while the WebSocket is not connected."
+        }
+      }
+    }
+  },
+  "selector": {
+    "charge_mode": {
+      "options": {
+        "fast": "Fast",
+        "off": "Off",
+        "pv": "PV",
+        "min_pv": "Min + PV",
+        "min": "Min",
+        "eco": "Eco",
+        "eco_pv": "Eco + PV",
+        "eco_min": "Eco + Min",
+        "eco_min_pv": "Eco + Min + PV"
+      }
+    },
+    "duration_limit": {
+      "options": {
+        "unlimited": "Unlimited",
+        "15_min": "15 minutes",
+        "30_min": "30 minutes",
+        "45_min": "45 minutes",
+        "1_h": "1 hour",
+        "2_h": "2 hours",
+        "3_h": "3 hours",
+        "4_h": "4 hours",
+        "6_h": "6 hours",
+        "8_h": "8 hours",
+        "12_h": "12 hours"
+      }
+    },
+    "nfc_action": {
+      "options": {
+        "toggle": "Toggle",
+        "start": "Start",
+        "stop": "Stop"
+      }
+    }
+  },
+  "services": {
+    "set_charge_mode": {
+      "name": "Set charge mode",
+      "description": "Sets the power manager charge mode of the charger.",
+      "fields": {
+        "device_id": {
+          "name": "Charger",
+          "description": "The WARP charger device."
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "Charge mode to activate."
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Set charge limits",
+      "description": "Sets energy, duration or SoC limits for charging sessions.",
+      "fields": {
+        "device_id": {
+          "name": "Charger",
+          "description": "The WARP charger device."
+        },
+        "energy_kwh": {
+          "name": "Energy limit",
+          "description": "Energy limit in kWh, 0 = unlimited."
+        },
+        "duration": {
+          "name": "Duration limit",
+          "description": "Maximum charging duration."
+        },
+        "soc_pct": {
+          "name": "SoC limit",
+          "description": "Target vehicle state of charge in % (WARP4, default limits only)."
+        },
+        "override": {
+          "name": "Only current session",
+          "description": "Apply to the running session instead of changing the defaults."
+        }
+      }
+    },
+    "set_external_current": {
+      "name": "Set external current",
+      "description": "Sets the external control current limit. 0 A blocks charging.",
+      "fields": {
+        "device_id": {
+          "name": "Charger",
+          "description": "The WARP charger device."
+        },
+        "current_a": {
+          "name": "Current",
+          "description": "0 or 6–32 A."
+        }
+      }
+    },
+    "inject_soc": {
+      "name": "Inject vehicle SoC",
+      "description": "Tells the charger the vehicle's state of charge (WARP4).",
+      "fields": {
+        "device_id": {
+          "name": "Charger",
+          "description": "The WARP charger device."
+        },
+        "soc_pct": {
+          "name": "SoC",
+          "description": "State of charge in %."
+        }
+      }
+    },
+    "inject_nfc_tag": {
+      "name": "Simulate NFC tag",
+      "description": "Simulates presenting an NFC tag to start or stop charging.",
+      "fields": {
+        "device_id": {
+          "name": "Charger",
+          "description": "The WARP charger device."
+        },
+        "tag_id": {
+          "name": "Tag-ID",
+          "description": "Tag id, e.g. 01:23:AB:3D."
+        },
+        "tag_type": {
+          "name": "Tag type",
+          "description": "0 Mifare Classic, 1–4 NFC Forum Type 1–4."
+        },
+        "action": {
+          "name": "Action",
+          "description": "Toggle, start or stop."
+        }
+      }
     }
   },
   "entity": {
@@ -60,6 +216,22 @@
           "eco_pv": "Eco + PV",
           "eco_min": "Eco + Min",
           "eco_min_pv": "Eco + Min + PV"
+        }
+      },
+      "duration_limit": {
+        "name": "Duration limit",
+        "state": {
+          "unlimited": "Unlimited",
+          "15_min": "15 minutes",
+          "30_min": "30 minutes",
+          "45_min": "45 minutes",
+          "1_h": "1 hour",
+          "2_h": "2 hours",
+          "3_h": "3 hours",
+          "4_h": "4 hours",
+          "6_h": "6 hours",
+          "8_h": "8 hours",
+          "12_h": "12 hours"
         }
       }
     },
@@ -84,29 +256,270 @@
           "error": "E/F - Error"
         }
       },
-      "allowed_current": { "name": "Allowed current" },
-      "power": { "name": "Power" },
-      "energy_total": { "name": "Total energy" },
-      "session_energy": { "name": "Session energy" },
-      "ev_name": { "name": "Vehicle" },
-      "ev_soc": { "name": "Vehicle SoC" }
+      "allowed_current": {
+        "name": "Allowed current"
+      },
+      "power": {
+        "name": "Power"
+      },
+      "energy_total": {
+        "name": "Total energy"
+      },
+      "session_energy": {
+        "name": "Session energy"
+      },
+      "ev_name": {
+        "name": "Vehicle"
+      },
+      "ev_soc": {
+        "name": "Vehicle SoC"
+      },
+      "current_l1": {
+        "name": "Current L1"
+      },
+      "current_l2": {
+        "name": "Current L2"
+      },
+      "current_l3": {
+        "name": "Current L3"
+      },
+      "voltage_l1": {
+        "name": "Voltage L1"
+      },
+      "voltage_l2": {
+        "name": "Voltage L2"
+      },
+      "voltage_l3": {
+        "name": "Voltage L3"
+      },
+      "power_l1": {
+        "name": "Power L1"
+      },
+      "power_l2": {
+        "name": "Power L2"
+      },
+      "power_l3": {
+        "name": "Power L3"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "energy_export": {
+        "name": "Exported energy"
+      },
+      "power_factor": {
+        "name": "Power factor"
+      },
+      "session_duration": {
+        "name": "Session duration"
+      },
+      "session_user": {
+        "name": "Session user"
+      },
+      "last_session_energy": {
+        "name": "Last session energy"
+      },
+      "last_session_duration": {
+        "name": "Last session duration"
+      },
+      "limit_target_energy": {
+        "name": "Limit: target energy"
+      },
+      "limit_target_time": {
+        "name": "Limit: end time"
+      },
+      "limit_target_soc": {
+        "name": "Limit: target SoC"
+      },
+      "uptime": {
+        "name": "Uptime"
+      },
+      "charging_time": {
+        "name": "Charging time"
+      },
+      "error_state": {
+        "name": "Error state",
+        "state": {
+          "ok": "OK",
+          "switch_error": "Switch error",
+          "dc_fault": "DC fault current",
+          "contactor_error": "Contactor error",
+          "communication_error": "Communication error",
+          "unknown_error": "Unknown error"
+        }
+      },
+      "dc_fault_state": {
+        "name": "DC fault current state",
+        "state": {
+          "ok": "OK",
+          "residual_6ma": "6 mA residual current",
+          "system_error": "System error",
+          "unknown_error": "Unknown error",
+          "calibration_error": "Calibration error",
+          "ac_error": "AC error",
+          "ac_dc_error": "AC + DC error"
+        }
+      },
+      "contactor_state": {
+        "name": "Contactor state"
+      },
+      "wifi_rssi": {
+        "name": "Wi-Fi signal"
+      },
+      "ip_address": {
+        "name": "IP address"
+      },
+      "ethernet_link": {
+        "name": "Ethernet",
+        "state": {
+          "not_configured": "Not configured",
+          "not_connected": "Not connected",
+          "connecting": "Connecting",
+          "connected": "Connected"
+        }
+      },
+      "grid_power": {
+        "name": "Grid power"
+      },
+      "available_power": {
+        "name": "Available power"
+      },
+      "phases": {
+        "name": "Phases",
+        "state": {
+          "one": "Single-phase",
+          "three": "Three-phase"
+        }
+      }
     },
     "binary_sensor": {
-      "connected": { "name": "Connected" },
-      "charging": { "name": "Charging" },
-      "error": { "name": "Error" }
+      "connected": {
+        "name": "Connected"
+      },
+      "charging": {
+        "name": "Charging"
+      },
+      "error": {
+        "name": "Error"
+      },
+      "websocket_connected": {
+        "name": "WebSocket connected"
+      },
+      "ntp_synced": {
+        "name": "Time synchronized"
+      }
     },
     "button": {
-      "start_charging": { "name": "Start charging" },
-      "stop_charging": { "name": "Stop charging" }
+      "start_charging": {
+        "name": "Start charging"
+      },
+      "stop_charging": {
+        "name": "Stop charging"
+      },
+      "reboot": {
+        "name": "Reboot"
+      },
+      "reset_dc_fault": {
+        "name": "Reset DC fault"
+      },
+      "check_for_update": {
+        "name": "Check for firmware update"
+      }
     },
     "number": {
-      "external_current": { "name": "External charging current" }
+      "external_current": {
+        "name": "External charging current"
+      },
+      "energy_limit": {
+        "name": "Energy limit"
+      },
+      "soc_limit": {
+        "name": "SoC limit"
+      },
+      "guaranteed_power": {
+        "name": "Minimum charging power"
+      },
+      "target_power_from_grid": {
+        "name": "Target grid power"
+      }
+    },
+    "switch": {
+      "auto_start_charging": {
+        "name": "Auto-start charging"
+      },
+      "boost_mode": {
+        "name": "Boost mode"
+      },
+      "ev_wakeup": {
+        "name": "Wake up vehicle"
+      },
+      "excess_charging": {
+        "name": "PV excess charging"
+      }
+    },
+    "event": {
+      "nfc_tag": {
+        "name": "NFC tag",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "seen": "Tag presented"
+            }
+          }
+        }
+      },
+      "charge_session": {
+        "name": "Charge session",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Started",
+              "ended": "Ended"
+            }
+          }
+        }
+      },
+      "button": {
+        "name": "Button",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "pressed": "Pressed"
+            }
+          }
+        }
+      }
+    },
+    "update": {
+      "firmware": {
+        "name": "Firmware"
+      }
     }
   },
   "exceptions": {
-    "authentication_error": { "message": "Authentication failed with the WARP charger" },
-    "communication_error": { "message": "Communication error with the WARP charger: {error}" },
-    "unknown_error": { "message": "Unknown error communicating with the WARP charger: {error}" }
+    "authentication_error": {
+      "message": "Authentication failed with the WARP charger"
+    },
+    "communication_error": {
+      "message": "Communication error with the WARP charger: {error}"
+    },
+    "unknown_error": {
+      "message": "Unknown error communicating with the WARP charger: {error}"
+    },
+    "write_failed": {
+      "message": "The WARP charger rejected the command: {error}"
+    },
+    "device_not_found": {
+      "message": "Device not found"
+    },
+    "device_not_loaded": {
+      "message": "The WARP charger is not loaded"
+    },
+    "no_limit_given": {
+      "message": "Provide at least one of energy, duration or SoC"
+    },
+    "soc_override_unsupported": {
+      "message": "SoC limits can only be set as default limits"
+    }
   }
 }

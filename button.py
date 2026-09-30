@@ -4,13 +4,19 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from typing import Any
 
-from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
+from homeassistant.components.button import (
+    ButtonDeviceClass,
+    ButtonEntity,
+    ButtonEntityDescription,
+)
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .api import WarpApi
-from .coordinator import WarpConfigEntry
+from .coordinator import WarpConfigEntry, WarpData
 from .entity import WarpEntity
 
 PARALLEL_UPDATES = 1
@@ -20,21 +26,43 @@ PARALLEL_UPDATES = 1
 class WarpButtonDescription(ButtonEntityDescription):
     """Describe a WARP button."""
 
-    press_fn: Callable[[WarpApi], Awaitable[None]]
+    has_fn: Callable[[WarpData], bool] = lambda _: True
+    press_fn: Callable[[WarpApi], Awaitable[Any]]
 
 
 DESCRIPTIONS: tuple[WarpButtonDescription, ...] = (
     WarpButtonDescription(
         key="start_charging",
         translation_key="start_charging",
-        icon="mdi:play",
         press_fn=lambda api: api.start_charging(),
     ),
     WarpButtonDescription(
         key="stop_charging",
         translation_key="stop_charging",
-        icon="mdi:stop",
         press_fn=lambda api: api.stop_charging(),
+    ),
+    WarpButtonDescription(
+        key="reboot",
+        translation_key="reboot",
+        device_class=ButtonDeviceClass.RESTART,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        press_fn=lambda api: api.reboot(),
+    ),
+    WarpButtonDescription(
+        key="reset_dc_fault",
+        translation_key="reset_dc_fault",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
+        has_fn=lambda d: "dc_fault_current_state" in d.evse,
+        press_fn=lambda api: api.reset_dc_fault(),
+    ),
+    WarpButtonDescription(
+        key="check_for_update",
+        translation_key="check_for_update",
+        device_class=ButtonDeviceClass.UPDATE,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        has_fn=lambda d: bool(d.fw_state),
+        press_fn=lambda api: api.check_for_update(),
     ),
 )
 
@@ -49,6 +77,7 @@ async def async_setup_entry(
     async_add_entities(
         WarpButtonEntity(entry=entry, coordinator=coordinator, description=description)
         for description in DESCRIPTIONS
+        if description.has_fn(coordinator.data)
     )
 
 
@@ -59,5 +88,4 @@ class WarpButtonEntity(WarpEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         """Trigger the action."""
-        await self.entity_description.press_fn(self.coordinator.api)
-        await self.coordinator.async_request_refresh()
+        await self._async_write(self.entity_description.press_fn(self.coordinator.api))

@@ -1,0 +1,69 @@
+rules:
+  # Bronze
+  action-setup: done
+  appropriate-polling: done
+  brands:
+    status: todo
+    comment: Custom integration; no brands PR.
+  common-modules: done
+  config-flow: done
+  config-flow-test-coverage: todo
+  dependency-transparency:
+    status: exempt
+    comment: No external requirements; aiohttp and httpx ship with Home Assistant core.
+  docs-actions: done
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup:
+    status: exempt
+    comment: Push updates are routed through the coordinator; entities do not subscribe themselves.
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters: done
+  docs-installation-parameters: done
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow: done
+  test-coverage: todo
+  # Gold
+  devices: done
+  diagnostics: done
+  discovery: done
+  discovery-update-info: done
+  docs-data-update: done
+  docs-examples: done
+  docs-known-limitations: done
+  docs-supported-devices: done
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: exempt
+    comment: One device per config entry.
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: done
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow: done
+  repair-issues:
+    status: exempt
+    comment: No user-fixable conditions beyond re-authentication.
+  stale-devices:
+    status: exempt
+    comment: One device per config entry.
+  # Platinum
+  async-dependency: done
+  inject-websession: done
+  strict-typing: todo

@@ -1,12 +1,18 @@
-"""Charge mode select for WARP chargers."""
+"""Select entities for WARP chargers."""
 
 from __future__ import annotations
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import CHARGE_MODE_MAP, CHARGE_MODE_REVERSE_MAP
+from .const import (
+    CHARGE_MODE_MAP,
+    CHARGE_MODE_REVERSE_MAP,
+    DURATION_LIMIT_MAP,
+    DURATION_LIMIT_REVERSE_MAP,
+)
 from .coordinator import WarpConfigEntry, WarpDataUpdateCoordinator
 from .entity import WarpEntity
 
@@ -18,16 +24,20 @@ async def async_setup_entry(
     entry: WarpConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    """Set up the charge mode select."""
+    """Set up the select entities."""
     coordinator = entry.runtime_data.coordinator
-    async_add_entities([WarpChargeModeSelect(entry=entry, coordinator=coordinator)])
+    entities: list[SelectEntity] = [
+        WarpChargeModeSelect(entry=entry, coordinator=coordinator)
+    ]
+    if "duration" in coordinator.data.limits_default:
+        entities.append(WarpDurationLimitSelect(entry=entry, coordinator=coordinator))
+    async_add_entities(entities)
 
 
 class WarpChargeModeSelect(WarpEntity, SelectEntity):
     """Select entity for the power manager charge mode."""
 
     _attr_translation_key = "charge_mode"
-    _attr_icon = "mdi:ev-station"
 
     def __init__(
         self, *, entry: WarpConfigEntry, coordinator: WarpDataUpdateCoordinator
@@ -60,5 +70,39 @@ class WarpChargeModeSelect(WarpEntity, SelectEntity):
 
     async def async_select_option(self, option: str) -> None:
         """Change the charge mode."""
-        await self.coordinator.api.set_charge_mode(CHARGE_MODE_REVERSE_MAP[option])
-        await self.coordinator.async_request_refresh()
+        await self._async_write(
+            self.coordinator.api.set_charge_mode(CHARGE_MODE_REVERSE_MAP[option])
+        )
+
+
+class WarpDurationLimitSelect(WarpEntity, SelectEntity):
+    """Select entity for the default charge duration limit."""
+
+    _attr_translation_key = "duration_limit"
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_options = list(DURATION_LIMIT_MAP.values())
+
+    def __init__(
+        self, *, entry: WarpConfigEntry, coordinator: WarpDataUpdateCoordinator
+    ) -> None:
+        """Initialize the select."""
+        super().__init__(
+            entry=entry,
+            coordinator=coordinator,
+            description=SelectEntityDescription(key="duration_limit"),
+        )
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the configured duration limit."""
+        duration = self.coordinator.data.limits_default.get("duration")
+        return DURATION_LIMIT_MAP.get(duration) if isinstance(duration, int) else None
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the duration limit."""
+        data = self.coordinator.data
+        await self._async_write(
+            self.coordinator.api.set_default_limits(
+                {"duration": DURATION_LIMIT_REVERSE_MAP[option]}, data.limits_default
+            )
+        )

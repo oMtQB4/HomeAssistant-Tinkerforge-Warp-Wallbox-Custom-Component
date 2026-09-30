@@ -13,11 +13,21 @@ from .const import (
     LOGGER,
     MAX_CONCURRENCY,
     REQUEST_TIMEOUT,
+    DC_FAULT_RESET_PASSWORD,
     T_CHARGE_MODE,
+    T_EV_INJECT_SOC,
     T_EXTERNAL_CURRENT,
+    T_FW_CHECK,
+    T_FW_INSTALL,
     T_INFO_DISPLAY_NAME,
     T_INFO_NAME,
     T_INFO_VERSION,
+    T_LIMITS_DEFAULT,
+    T_NFC_INJECT,
+    T_NFC_INJECT_START,
+    T_NFC_INJECT_STOP,
+    T_REBOOT,
+    T_RESET_DC_FAULT,
     T_START_CHARGING,
     T_STOP_CHARGING,
     WRITE_METHOD,
@@ -167,3 +177,46 @@ class WarpApi:
     async def stop_charging(self) -> None:
         """Stop charging (like pressing the button)."""
         await self.command(T_STOP_CHARGING)
+
+    async def write_config(
+        self, topic: str, patch: dict[str, Any], current: dict[str, Any] | None = None
+    ) -> None:
+        """Read-modify-write a config object (the API wants the full object)."""
+        base = current if isinstance(current, dict) else await self.get(topic)
+        if not isinstance(base, dict):
+            raise WarpError(f"{topic}: unexpected config payload {base!r}")
+        await self.put(topic, {**base, **patch})
+
+    async def set_default_limits(
+        self, patch: dict[str, Any], current: dict[str, Any] | None = None
+    ) -> None:
+        """Update charge_limits/default_limits."""
+        await self.write_config(T_LIMITS_DEFAULT, patch, current)
+
+    async def inject_soc(self, soc: float) -> None:
+        """Inject the vehicle state of charge (WARP4)."""
+        await self.put(T_EV_INJECT_SOC, {"soc": soc})
+
+    async def inject_nfc_tag(self, tag_id: str, tag_type: int, action: str) -> None:
+        """Simulate an NFC tag (toggle/start/stop)."""
+        topic = {
+            "start": T_NFC_INJECT_START,
+            "stop": T_NFC_INJECT_STOP,
+        }.get(action, T_NFC_INJECT)
+        await self.put(topic, {"tag_type": tag_type, "tag_id": tag_id})
+
+    async def reboot(self) -> None:
+        """Reboot the charger."""
+        await self.command(T_REBOOT)
+
+    async def reset_dc_fault(self) -> None:
+        """Reset the DC fault current state (cause must be fixed first)."""
+        await self.put(T_RESET_DC_FAULT, {"password": DC_FAULT_RESET_PASSWORD})
+
+    async def check_for_update(self) -> None:
+        """Trigger a firmware update check."""
+        await self.command(T_FW_CHECK)
+
+    async def install_firmware(self, version: str) -> None:
+        """Install the given firmware version (firmware_update version string)."""
+        await self.put(T_FW_INSTALL, {"version": version})
