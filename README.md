@@ -38,7 +38,7 @@ they are enabled in the WARP web interface.
 ## Installation
 
 ### HACS
-Add `https://github.com/oMtQB4/oMtQB4-HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component` as a custom repository (category *Integration*), install **WARP Charger**, restart Home Assistant.
+Add `https://github.com/oMtQB4/HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component` as a custom repository (category *Integration*), install **WARP Charger**, restart Home Assistant.
 
 ### Manual
 Copy `custom_components/warp_charger/` from this repository to `config/custom_components/warp_charger/` and restart Home Assistant.

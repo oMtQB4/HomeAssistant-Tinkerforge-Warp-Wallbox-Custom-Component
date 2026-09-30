@@ -21,5 +21,3 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
-          # brands: pending home-assistant/brands PR (see brands/)
-          ignore: brands

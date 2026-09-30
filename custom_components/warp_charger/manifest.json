@@ -11,7 +11,7 @@
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/oMtQB4/oMtQB4-HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component/issues",
   "requirements": [],
-  "version": "2.0.0",
+  "version": "2.0.1",
   "zeroconf": [
     {
       "type": "_http._tcp.local.",

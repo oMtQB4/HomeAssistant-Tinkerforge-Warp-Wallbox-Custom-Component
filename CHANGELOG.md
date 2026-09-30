@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1 (2026-09-30)
+
+- Brand icons shipped inside the integration (`brand/`)
+- Services reject SoC parameters on chargers without vehicle support
+- README: badges and supported hardware
+
 ## 2.0.0 (2026-09-30)
 
 - Push updates via the charger WebSocket (`local_push`) with polling fallback
