@@ -1,8 +1,25 @@
-# WARP Charger for Home Assistant
+# WARP Charger Integration for Home Assistant
 
-Local integration for [Tinkerforge WARP](https://warp-charger.com/) wallboxes (WARP1–WARP4).
-It talks to the charger's HTTPS API and WebSocket directly. No cloud, no MQTT broker required.
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz)
+[![Validate](https://github.com/oMtQB4/HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component/actions/workflows/validate.yml/badge.svg)](https://github.com/oMtQB4/HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component/actions/workflows/validate.yml)
+[![GitHub release](https://img.shields.io/github/v/release/oMtQB4/HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component)](https://github.com/oMtQB4/HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component/releases)
 
+Custom [Home Assistant](https://www.home-assistant.io/) integration for [Tinkerforge WARP](https://warp-charger.com/)
+wallboxes. It talks to the charger's HTTPS API and WebSocket directly on the local network. No cloud, no MQTT broker required.
+
+## Supported hardware
+
+| Model | Status | Notes |
+|---|---|---|
+| **WARP4 Charger** (Smart / Pro) | Tested | Development device, firmware 2.13.x. Vehicle SoC / name and SoC limits (ISO 15118) are WARP4-only. |
+| **WARP3 Charger** (Smart / Pro) | Expected to work | Same HTTP/WebSocket API. Untested, feedback welcome. |
+| **WARP2 Charger** (Smart / Pro) | Expected to work | Same API. Untested. |
+| **WARP1 Charger** (Smart / Pro) | Probably works | Same API surface; entities that need a hardware feature (DC fault, EV wake-up, meter) are only created when the charger reports it. Untested. |
+| **WARP Energy Manager** (WEM / WEM2) | Not supported | No EVSE; discovery ignores it. |
+
+Requirements: firmware 2.x with the HTTP API enabled (default). *Smart* variants without an energy meter get no power/energy entities.
+The charge-mode list follows what the charger offers (`charge_manager/supported_charge_modes`), so PV/Eco modes appear only when
+they are enabled in the WARP web interface.
 ## Features
 
 - **Push updates** via the charger's WebSocket (`/ws`) with HTTP polling as fallback (`iot_class: local_push`).
