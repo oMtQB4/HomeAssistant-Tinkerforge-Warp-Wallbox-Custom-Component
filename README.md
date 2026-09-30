@@ -21,10 +21,10 @@ It talks to the charger's HTTPS API and WebSocket directly. No cloud, no MQTT br
 ## Installation
 
 ### HACS
-Add this repository as a custom repository (category *Integration*), install **WARP Charger**, restart Home Assistant.
+Add `https://github.com/oMtQB4/oMtQB4-HomeAssistant-Tinkerforge-Warp-Wallbox-Custom-Component` as a custom repository (category *Integration*), install **WARP Charger**, restart Home Assistant.
 
 ### Manual
-Copy the `warp_charger` folder to `config/custom_components/warp_charger/` and restart Home Assistant.
+Copy `custom_components/warp_charger/` from this repository to `config/custom_components/warp_charger/` and restart Home Assistant.
 
 ## Setup
 
