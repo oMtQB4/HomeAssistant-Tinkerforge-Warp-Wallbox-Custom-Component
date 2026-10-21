@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.2 (2026-10-21)
+
+- Config flow no longer pre-fills the host field
+- Fixed documentation and issue tracker URLs in the manifest
+- Diagnostics redact NFC tag ids
+- README: note that the NFC event exposes the tag id
+
 ## 2.0.1 (2026-09-30)
 
 - Brand icons shipped inside the integration (`brand/`)
