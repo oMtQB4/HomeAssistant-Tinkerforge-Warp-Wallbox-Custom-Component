@@ -30,10 +30,13 @@ they are enabled in the WARP web interface.
 - Controls: start/stop charging, external current limit, energy/duration/SoC limits, auto-start, boost mode,
   EV wake-up, PV excess charging, minimum charging power, target grid power, reboot, DC fault reset.
 - Events: NFC tag presented, charge session started/ended, front button pressed.
+  The NFC event carries the raw `tag_id` (plus `tag_type` and the resolved `user`) in its event data, so the tag id
+  is visible in the event entity's state attributes, the logbook and the recorder history. NFC tag ids authorize
+  charging; treat them like credentials when sharing screenshots or exports.
 - Firmware **update entity** with install support.
 - Services: `warp_charger.set_charge_mode`, `set_charge_limits`, `set_external_current`, `inject_soc`, `inject_nfc_tag`.
 - Config flow with zeroconf discovery, re-authentication, reconfigure and options (poll interval, WebSocket on/off).
-- Diagnostics download (credentials redacted), German and English translations.
+- Diagnostics download (credentials and NFC tag ids redacted), German and English translations.
 
 ## Installation
 

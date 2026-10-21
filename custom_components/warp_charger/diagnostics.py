@@ -12,7 +12,14 @@ from homeassistant.core import HomeAssistant
 from .const import T_USERS_CONFIG
 from .coordinator import WarpConfigEntry
 
-TO_REDACT = {CONF_USERNAME, CONF_PASSWORD, "digest_hash", "mac", "username"}
+TO_REDACT = {
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    "digest_hash",
+    "mac",
+    "tag_id",
+    "username",
+}
 
 
 async def async_get_config_entry_diagnostics(

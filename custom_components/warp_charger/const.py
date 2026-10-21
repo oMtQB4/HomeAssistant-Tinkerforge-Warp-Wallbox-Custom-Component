@@ -8,7 +8,6 @@ import logging
 DOMAIN = "warp_charger"
 LOGGER = logging.getLogger(__package__)
 
-DEFAULT_HOST = "192.168.178.15"
 CONF_VERIFY_SSL = "verify_ssl"
 CONF_SCAN_INTERVAL = "scan_interval"
 CONF_USE_WEBSOCKET = "use_websocket"

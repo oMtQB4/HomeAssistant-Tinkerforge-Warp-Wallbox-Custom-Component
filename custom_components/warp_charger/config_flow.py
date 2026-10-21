@@ -38,7 +38,6 @@ from .const import (
     CONF_SCAN_INTERVAL,
     CONF_USE_WEBSOCKET,
     CONF_VERIFY_SSL,
-    DEFAULT_HOST,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     LOGGER,
@@ -58,7 +57,7 @@ _AUTH_FIELDS = {
 
 STEP_USER_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_HOST, default=DEFAULT_HOST): TextSelector(
+        vol.Required(CONF_HOST): TextSelector(
             TextSelectorConfig(autocomplete="off")
         ),
         **_AUTH_FIELDS,
