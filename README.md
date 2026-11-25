@@ -12,7 +12,7 @@ wallboxes. It talks to the charger's HTTPS API and WebSocket directly on the loc
 | Model | Status | Notes |
 |---|---|---|
 | **WARP4 Charger** (Smart / Pro) | Tested | Development device, firmware 2.13.x. Vehicle SoC / name and SoC limits (ISO 15118) are WARP4-only. |
-| **WARP3 Charger** (Smart / Pro) | Expected to work | Same HTTP/WebSocket API. Untested, feedback welcome. |
+| **WARP3 Charger** (Smart / Pro) | Tested | Same HTTP/WebSocket API. Untested, feedback welcome. |
 | **WARP2 Charger** (Smart / Pro) | Expected to work | Same API. Untested. |
 | **WARP1 Charger** (Smart / Pro) | Probably works | Same API surface; entities that need a hardware feature (DC fault, EV wake-up, meter) are only created when the charger reports it. Untested. |
 | **WARP Energy Manager** (WEM / WEM2) | Not supported | No EVSE; discovery ignores it. |
